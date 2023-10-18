@@ -12,12 +12,6 @@ type formData = {
   message: string;
 };
 
-// フォームの選択肢の型
-type SelectOption = {
-  label: string;
-  value: string;
-};
-
 export default function Home() {
   // フォームの初期値
   const defaultValue: formData = {
@@ -28,24 +22,21 @@ export default function Home() {
     message: '',
   };
 
-  const options: SelectOption[] = [
-    { label: 'お問い合わせ', value: 'お問い合わせ' },
-    { label: 'ご意見', value: 'ご意見' },
-    { label: 'その他', value: 'その他' },
-  ];
+  const options: string[] = ['会社について', '製品について', '採用について', 'PR&広報'];
 
   const [form, setForm] = useState(defaultValue);
 
   // フォームの送信処理
   const send = async (e: any) => {
     e.preventDefault();
-    fetch('/api/blastengine', {
+    const res = await fetch('/api/blastengine', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(form),
     });
+    alert('お問い合わせありがとうございます');
   };
 
   return (
@@ -105,12 +96,12 @@ export default function Home() {
                 }
               >
                 {options.map((option) => (
-                  <option value={option.value} key={option.value}>{option.label}</option>
+                  <option value={option} key={option}>{option}</option>
                 ))}
               </select>
             </div>
             <div className="message block">
-              <label htmlFor="frm-message">Message</label>
+              <label htmlFor="frm-message">お問い合わせ内容</label>
               <textarea
                 id="frm-message"
                 rows={6}

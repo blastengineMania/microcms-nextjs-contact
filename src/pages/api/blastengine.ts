@@ -1,16 +1,41 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { BlastEngine, Mail } from 'blastengine';
+import fetch from 'node-fetch';
 
 type Data = {
-  delivery_id: number
+  delivery_id?: number,
+  error?: string
 }
+
+// blastengine SDKの初期化
+new BlastEngine(process.env.BLASTENGINE_USER_ID!, process.env.BLASTENGINE_API_KEY!);
 
 export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse<Data>
   ) {
   const { body } = req;
-  new BlastEngine(process.env.BLASTENGINE_USER_ID!, process.env.BLASTENGINE_API_KEY!);
+  // microCMSへの登録
+  const response = await fetch(process.env.MICROCMS_ENDPOINT!, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-MICROCMS-API-KEY': process.env.MICROCMS_API_KEY!
+    },
+    body: JSON.stringify({
+      name: body.name,
+      email: body.email,
+      company: body.company,
+      type: [body.type],
+      message: body.message,
+    })
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    res.status(500).json({ error: `microCMSへの登録に失敗しました\n ${text}` });
+    return;
+  }
   const mail = new Mail();
   const text = `__USERNAME__様
 
